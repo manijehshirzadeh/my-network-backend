@@ -1,19 +1,5 @@
 const mongoose = require("mongoose");
 
-const commentSchema = new mongoose.Schema(
-  {
-    content: {
-      type: String,
-      required: true,
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  },
-  { timestamps: true }
-);
-
 const postSchema = new mongoose.Schema(
   {
     owner: {
@@ -37,7 +23,12 @@ const postSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    comments: [commentSchema],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     likedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
