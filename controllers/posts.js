@@ -29,9 +29,8 @@ router.post("/", async (req, res) => {
     const post = await Post.create({
       ...req.body,
       owner: req.user._id,
-    })
-      .post.populate("owner")
-      .populate({ path: "comments", populate: "owner" });
+    });
+
     res.status(201).json(post);
   } catch (error) {
     console.log(error);
