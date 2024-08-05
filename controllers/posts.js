@@ -15,6 +15,7 @@ router.get("/", async (req, res) => {
   try {
     const posts = await Post.find({})
       .populate(["owner", "likedBy"])
+      .populate({ path: "comments", populate: "owner" })
       .sort({ createdAt: "desc" });
     res.json(posts);
   } catch (error) {
