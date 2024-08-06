@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const verifyToken = require("../middleware/verify-token");
 
 const SALT_LENGTH = 12;
 
@@ -44,5 +45,19 @@ router.post("/signin", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
+// Show all users
+router.get("/", verifyToken, async (req, res) => {
+  try {
+    const users = await User.find({})
+      .populate(["friends", "friendsRequests"])
+      .sort({ createdAt: "desc" });
+    res.json(users);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error.message);
+  }
+});
+
 
 module.exports = router;
