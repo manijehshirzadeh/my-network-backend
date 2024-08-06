@@ -59,5 +59,86 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
+// Request a user to add as Friend
+router.put("/:userId/add", verifyToken, async (req, res) => {
+  console.log({ userId: req.params.userId });
+  console.log({ userId: req.user._id });
+
+  try {
+    if (req.user._id === req.params.userId) {
+      res.status(400);
+      throw new Error("Bad request.");
+    }
+    const friend = await User.findById(req.params.userId);
+    console.log({ friend });
+
+    const user = await User.findById(req.user._id);
+
+    if (friend.friendsRequests.some((f) => f.equals(friend._id))) {
+      res.status(400);
+      throw new Error("Already sent a friend request to this usder.");
+    } else if (friend.friends.some((f) => f.equals(friend._id))) {
+      res.status(400);
+      throw new Error("Already friends.");
+    } else {
+      // user.friendsRequests = [];
+      friend.friendsRequests.push(user);
+      friend.save();
+    }
+
+    res.json("Friend request has been successfully sent.");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error.message);
+  }
+});
+
+// Accept a friend request
+router.put("/:userId/accept", verifyToken, async (req, res) => {
+  console.log({ userId: req.params.userId });
+  console.log({ userId: req.user._id });
+
+  try {
+    if (req.user._id === req.params.userId) {
+      res.status(400);
+      throw new Error("Bad request.");
+    }
+
+    const friend = await User.findById(req.params.userId);
+
+    const user = await User.findById(req.user._id);
+
+    const requests = user.friendsRequests;
+    console.log(requests);
+
+    if (requests.some((request) => request.equals(friend._id))) {
+      const newRequests = requests.filter(
+        (request) => !request.equals(friend._id)
+      );
+      user.friendsRequests = newRequests;
+
+      user.friends.push(friend);
+      friend.friends.push(user);
+      user.save();
+      friend.save();
+    } else {
+      res.status(400);
+      throw new Error(
+        "Bad request. You don't have a friend request from this user."
+      );
+    }
+
+    const updatedUser = await User.findById(req.user._id).populate([
+      "friends",
+      "friendsRequests",
+    ]);
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error.message);
+  }
+});
+
 
 module.exports = router;
