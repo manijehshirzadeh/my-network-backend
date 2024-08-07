@@ -1,7 +1,6 @@
 const express = require("express");
 const verifyToken = require("../middleware/verify-token.js");
 const Comment = require("../models/comment.js");
-
 const Post = require("../models/post.js");
 const router = express.Router();
 
@@ -24,6 +23,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Show a Post page
+router.get("/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate("owner")
+      .populate({ path: "comments", populate: "owner" });
+    res.json(post);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error.message);
+  }
+});
+
 // Creating a new Post
 router.post("/", async (req, res) => {
   try {
@@ -39,13 +51,21 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Show a Listing page
-router.get("/:id", async (req, res) => {
+// Update an existing Post
+router.put("/:id", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
+    const post = await Post.findById(req.params.id);
+    if (!post.owner.equals(req.user._id)) {
+      return res.status(403).json("You are not permitted to modify this post");
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    })
       .populate("owner")
       .populate({ path: "comments", populate: "owner" });
-    res.json(post);
+
+    res.json(updatedPost);
   } catch (error) {
     console.log(error);
     res.status(500).json(error.message);
@@ -57,9 +77,7 @@ router.delete("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post.owner.equals(req.user._id)) {
-      return res
-        .status(403)
-        .json("You are not permitted to delete this listing");
+      return res.status(403).json("You are not permitted to delete this post");
     }
 
     await post.deleteOne();
@@ -91,29 +109,6 @@ router.put("/:id/like", async (req, res) => {
     const updatedPost = await Post.findById(req.params.id)
       .populate("owner")
       .populate({ path: "comments", populate: "owner" });
-    res.json(updatedPost);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error.message);
-  }
-});
-
-// Update an existing Post
-router.put("/:id", async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post.owner.equals(req.user._id)) {
-      return res
-        .status(403)
-        .json("You are not permitted to modify this listing");
-    }
-
-    const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    })
-      .populate("owner")
-      .populate({ path: "comments", populate: "owner" });
-
     res.json(updatedPost);
   } catch (error) {
     console.log(error);

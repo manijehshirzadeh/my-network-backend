@@ -61,16 +61,12 @@ router.get("/", verifyToken, async (req, res) => {
 
 // Request a user to add as Friend
 router.put("/:userId/add", verifyToken, async (req, res) => {
-  console.log({ userId: req.params.userId });
-  console.log({ userId: req.user._id });
-
   try {
     if (req.user._id === req.params.userId) {
       res.status(400);
       throw new Error("Bad request.");
     }
     const friend = await User.findById(req.params.userId);
-    console.log({ friend });
 
     const user = await User.findById(req.user._id);
 
@@ -81,7 +77,6 @@ router.put("/:userId/add", verifyToken, async (req, res) => {
       res.status(400);
       throw new Error("Already friends.");
     } else {
-      // user.friendsRequests = [];
       friend.friendsRequests.push(user);
       friend.save();
     }
@@ -95,9 +90,6 @@ router.put("/:userId/add", verifyToken, async (req, res) => {
 
 // Accept a friend request
 router.put("/:userId/accept", verifyToken, async (req, res) => {
-  console.log({ userId: req.params.userId });
-  console.log({ userId: req.user._id });
-
   try {
     if (req.user._id === req.params.userId) {
       res.status(400);
@@ -109,7 +101,6 @@ router.put("/:userId/accept", verifyToken, async (req, res) => {
     const user = await User.findById(req.user._id);
 
     const requests = user.friendsRequests;
-    console.log(requests);
 
     if (requests.some((request) => request.equals(friend._id))) {
       const newRequests = requests.filter(
@@ -139,6 +130,5 @@ router.put("/:userId/accept", verifyToken, async (req, res) => {
     res.status(500).json(error.message);
   }
 });
-
 
 module.exports = router;

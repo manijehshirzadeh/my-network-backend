@@ -10,16 +10,6 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    postAudience: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    isPublic: {
-      type: Boolean,
-      required: true,
-    },
     image: {
       type: String,
     },
