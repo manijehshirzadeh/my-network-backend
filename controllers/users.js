@@ -70,10 +70,10 @@ router.put("/:userId/add", verifyToken, async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    if (friend.friendsRequests.some((f) => f.equals(friend._id))) {
+    if (friend.friendsRequests.some((f) => f.equals(user._id))) {
       res.status(400);
       throw new Error("Already sent a friend request to this usder.");
-    } else if (friend.friends.some((f) => f.equals(friend._id))) {
+    } else if (friend.friends.some((f) => f.equals(user._id))) {
       res.status(400);
       throw new Error("Already friends.");
     } else {
