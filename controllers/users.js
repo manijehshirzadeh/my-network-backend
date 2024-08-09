@@ -59,7 +59,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// Request a user to add as Friend
+// Sending a friend request to another user
 router.put("/:userId/add", verifyToken, async (req, res) => {
   try {
     if (req.user._id === req.params.userId) {
@@ -72,7 +72,7 @@ router.put("/:userId/add", verifyToken, async (req, res) => {
 
     if (friend.friendsRequests.some((f) => f.equals(friend._id))) {
       res.status(400);
-      throw new Error("Already sent a friend request to this usder.");
+      throw new Error("Already sent a friend request to this user.");
     } else if (friend.friends.some((f) => f.equals(friend._id))) {
       res.status(400);
       throw new Error("Already friends.");
